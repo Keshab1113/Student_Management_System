@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+
+/* Custom styles for the heatmap */
+.color-empty {
+  fill: #ebedf0;
+}
+
+.dark .color-empty {
+  fill: #2d3748;
+}
+
+.color-scale-0 {
+  fill: #9be9a8;
+}
+
+.color-scale-1 {
+  fill: #40c463;
+}
+
+.color-scale-2 {
+  fill: #30a14e;
+}
+
+.color-scale-3 {
+  fill: #216e39;
+}
+
+.color-scale-4 {
+  fill: #144d27;
+}
+
+.dark .color-scale-0 {
+  fill: #2d3748;
+}
+
+.dark .color-scale-1 {
+  fill: #2c5282;
+}
+
+.dark .color-scale-2 {
+  fill: #2b6cb0;
+}
+
+.dark .color-scale-3 {
+  fill: #3182ce;
+}
+
+.dark .color-scale-4 {
+  fill: #4299e1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
