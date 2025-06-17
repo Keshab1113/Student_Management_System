@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-
-/* Custom styles for the heatmap */
 .color-empty {
   fill: #ebedf0;
 }
