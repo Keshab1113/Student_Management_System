@@ -8,19 +8,22 @@ import { ThemeContext } from '../context/ThemeContext';
 import { FiEdit } from "react-icons/fi";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { FaSyncAlt } from "react-icons/fa";
+import { deleteStudent } from '../services/api';
 
 const StudentTable = ({ students, loading, onSyncStudent }) => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [allStudents, setStudents] = useState([]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const { darkMode } = useContext(ThemeContext);
 
     const filteredStudents = students.filter(student =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.cfHandle.toLowerCase().includes(searchTerm.toLowerCase())
+        student.codeforcesHandle.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleEdit = (student) => {
@@ -34,7 +37,7 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
     };
 
     const handleSync = (student) => {
-        onSyncStudent(student.id, student.cfHandle);
+        // onSyncStudent(student.id, student.codeforcesHandle);
     };
 
     const csvData = [
@@ -42,11 +45,11 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
         ...students.map(student => [
             student.name,
             student.email,
-            student.phone,
-            student.cfHandle,
+            student.phoneNumber,
+            student.codeforcesHandle,
             student.currentRating || 'N/A',
             student.maxRating || 'N/A',
-            student.lastUpdated ? new Date(student.lastUpdated).toLocaleString() : 'Never'
+            student.updatedAt ? new Date(student.updatedAt).toLocaleString() : 'Never'
         ])
     ];
 
@@ -73,7 +76,7 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
                     />
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                     >
                         Add Student
                     </button>
@@ -106,20 +109,20 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
                             filteredStudents.map((student) => (
                                 <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <Link to={`/student/${student.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                                        <Link to={`/student/${student._id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                                             {student.name}
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">{student.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">{student.phone}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">{student.phoneNumber}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <a
-                                            href={`https://codeforces.com/profile/${student.cfHandle}`}
+                                            href={`https://codeforces.com/profile/${student.codeforcesHandle}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-600 dark:text-blue-400 hover:underline"
                                         >
-                                            {student.cfHandle}
+                                            {student.codeforcesHandle}
                                         </a>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -147,7 +150,7 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">
-                                        {student.lastUpdated ? new Date(student.lastUpdated).toLocaleString() : 'Never'}
+                                        {student.updatedAt ? new Date(student.updatedAt).toLocaleString() : 'Never'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2 md:justify-around">
@@ -204,9 +207,15 @@ const StudentTable = ({ students, loading, onSyncStudent }) => {
                     <ConfirmationModal
                         isOpen={showDeleteModal}
                         onClose={() => setShowDeleteModal(false)}
-                        onConfirm={() => {
-                            setStudents(students.filter(s => s.id !== selectedStudent.id));
-                            setShowDeleteModal(false);
+                        onConfirm={async () => {
+                            try {
+                                await deleteStudent(selectedStudent._id);
+                                alert("Student Deleted");
+                                setStudents(prev => prev.filter(s => s._id !== selectedStudent._id));
+                            } catch (err) {
+                                console.error('Failed to delete:', err.message);
+                                alert('Delete failed');
+                            }
                         }}
                         title="Delete Student"
                         message={`Are you sure you want to delete ${selectedStudent.name}?`}

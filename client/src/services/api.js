@@ -1,65 +1,58 @@
-// Mock API service - in a real app, these would be actual API calls to your backend
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchStudents = async () => {
-    // Simulate API call
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve([
-                {
-                    id: 1,
-                    name: 'John Doe',
-                    email: 'john@example.com',
-                    phone: '123-456-7890',
-                    cfHandle: 'john_cf',
-                    currentRating: 1500,
-                    maxRating: 1600,
-                    lastUpdated: '2023-05-15T10:30:00Z',
-                    syncTime: '02:00',
-                    syncFrequency: 'daily',
-                    emailReminders: true,
-                    reminderCount: 2,
-                    lastReminderSent: '2023-05-10T08:00:00Z'
-                },
-                {
-                    id: 2,
-                    name: 'Jane Smith',
-                    email: 'jane@example.com',
-                    phone: '987-654-3210',
-                    cfHandle: 'jane_cf',
-                    currentRating: 2100,
-                    maxRating: 2200,
-                    lastUpdated: '2023-05-14T09:15:00Z',
-                    syncTime: '03:00',
-                    syncFrequency: 'daily',
-                    emailReminders: false,
-                    reminderCount: 0,
-                    lastReminderSent: null
-                }
-            ]);
-        }, 500);
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/students`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const students = await response.json();
+        return students;
+    } catch (error) {
+        console.error('Failed to fetch from server, using sample data:', error);       
+    }
 };
 
+
 export const fetchStudentProfile = async (id) => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve({
-                id: parseInt(id),
-                name: id === '1' ? 'John Doe' : 'Jane Smith',
-                email: id === '1' ? 'john@example.com' : 'jane@example.com',
-                phone: id === '1' ? '123-456-7890' : '987-654-3210',
-                cfHandle: id === '1' ? 'john_cf' : 'jane_cf',
-                currentRating: id === '1' ? 1500 : 2100,
-                maxRating: id === '1' ? 1600 : 2200,
-                lastUpdated: id === '1' ? '2023-05-15T10:30:00Z' : '2023-05-14T09:15:00Z',
-                syncTime: id === '1' ? '02:00' : '03:00',
-                syncFrequency: 'daily',
-                emailReminders: id === '1',
-                reminderCount: id === '1' ? 2 : 0,
-                lastReminderSent: id === '1' ? '2023-05-10T08:00:00Z' : null
-            });
-        }, 500);
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/students/${id}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch student from backend');
+        }
+        const student = await response.json();
+        const cfHandle = student.codeforcesHandle;
+
+        const cfResponse = await fetch(`https://codeforces.com/api/user.info?handles=${cfHandle}`);
+        const cfData = await cfResponse.json();
+
+        if (cfData.status !== 'OK') {
+            throw new Error('Failed to fetch Codeforces data');
+        }
+
+        const cfUser = cfData.result[0];
+        const lastUpdated = new Date(cfUser.lastOnlineTimeSeconds * 1000).toISOString();
+        console.log("cfUser ", cfUser);
+
+        return {
+            id: student._id,
+            name: student.name,
+            email: student.email,
+            phone: student.phone,
+            cfHandle: cfUser.handle,
+            currentRating: cfUser.rating || 0,
+            maxRating: cfUser.maxRating || 0,
+            lastUpdated: lastUpdated,
+            syncTime: student.syncTime || '02:00',
+            syncFrequency: student.syncFrequency || 'daily',
+            emailReminders: student.emailReminders ?? true,
+            reminderCount: student.reminderCount ?? 0,
+            lastReminderSent: student.lastReminderSent ?? null
+        };
+    } catch (error) {
+        console.error('Error fetching student profile:', error.message);
+        return null;
+    }
 };
 
 export const fetchContestHistory = async (studentId, days) => {
@@ -124,41 +117,49 @@ export const fetchProblemData = async (studentId, days) => {
 };
 
 export const addStudent = async (studentData) => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve({
-                id: Math.floor(Math.random() * 1000) + 3,
-                ...studentData,
-                currentRating: 0,
-                maxRating: 0,
-                lastUpdated: null,
-                syncTime: '02:00',
-                syncFrequency: 'daily',
-                emailReminders: true,
-                reminderCount: 0,
-                lastReminderSent: null
-            });
-        }, 500);
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/students`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add student');
+        }
+
+        const newStudent = await response.json();
+        return newStudent;
+    } catch (error) {
+        console.error('Error adding student:', error.message);
+        throw error;
+    }
 };
 
 export const updateStudent = async (id, studentData) => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve({
-                id,
-                ...studentData,
-                currentRating: id === 1 ? 1500 : 2100,
-                maxRating: id === 1 ? 1600 : 2200,
-                lastUpdated: new Date().toISOString(),
-                syncTime: '02:00',
-                syncFrequency: 'daily',
-                emailReminders: true,
-                reminderCount: id === 1 ? 2 : 0,
-                lastReminderSent: id === 1 ? '2023-05-10T08:00:00Z' : null
-            });
-        }, 500);
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/students/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update student');
+        }
+
+        const updatedStudent = await response.json();
+        return updatedStudent;
+    } catch (error) {
+        console.error('Error updating student:', error);
+        throw error;
+    }
 };
 
 export const syncStudentData = async (studentId, cfHandle) => {
@@ -193,7 +194,25 @@ export const updateSyncSettings = async (studentId, settings) => {
     });
 };
 
-// Helper function to generate mock submission calendar data
+export const deleteStudent = async (id) => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/students/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete student');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        throw error;
+    }
+};
+
+
 function generateSubmissionCalendar(days) {
     const count = parseInt(days);
     const result = [];

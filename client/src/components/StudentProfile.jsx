@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import ContestHistory from './ContestHistory';
 import ProblemSolvingData from './ProblemSolvingData';
 import SyncSettings from './SyncSettings';
 import { fetchStudentProfile } from '../services/api';
+import { ThemeContext } from '../context/ThemeContext';
 
 const StudentProfile = () => {
     const { id } = useParams();
@@ -12,6 +13,8 @@ const StudentProfile = () => {
     const [activeTab, setActiveTab] = useState('contest');
     const [contestFilter, setContestFilter] = useState('30');
     const [problemFilter, setProblemFilter] = useState('7');
+    const { darkMode } = useContext(ThemeContext);
+    
 
     useEffect(() => {
         const loadStudentProfile = async () => {
@@ -37,8 +40,8 @@ const StudentProfile = () => {
 
     if (!student) {
         return (
-            <div className="text-center py-8 text-gray-600 dark:text-gray-300">
-                Student not found
+            <div className={`text-center text-2xl py-8 ${darkMode ? "text-gray-300" :"text-gray-600"}`}>
+                Student Codeforces Account not found
             </div>
         );
     }

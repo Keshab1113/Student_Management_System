@@ -164,28 +164,29 @@ const ProblemSolvingData = ({ studentId, filter, onFilterChange }) => {
 
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Submission Heatmap</h3>
-                <div className="overflow-x-auto">
-                    <CalendarHeatmap
-                        startDate={new Date(Date.now() - parseInt(filter) * 24 * 60 * 60 * 1000)}
-                        endDate={new Date()}
-                        values={problemData.submissionCalendar}
-                        classForValue={(value) => {
-                            if (!value) {
-                                return 'color-empty';
-                            }
-                            return `color-scale-${Math.min(4, Math.floor(value.count / 5))}`;
-                        }}
-                        tooltipDataAttrs={(value) => {
-                            if (!value || !value.date) {
-                                return null;
-                            }
-                            return {
-                                'data-tooltip': `${value.date}: ${value.count} problems solved`,
-                            };
-                        }}
-                    />
+                <div className="w-full overflow-x-auto">
+                    <div className="min-w-[700px] h-[200px]">
+                        <CalendarHeatmap
+                            startDate={new Date(Date.now() - parseInt(filter) * 24 * 60 * 60 * 1000)}
+                            endDate={new Date()}
+                            values={problemData.submissionCalendar}
+                            classForValue={(value) => {
+                                if (!value) return 'color-empty';
+                                return `color-scale-${Math.min(4, Math.floor(value.count / 5))}`;
+                            }}
+                            tooltipDataAttrs={(value) => {
+                                if (!value || !value.date) return null;
+                                return {
+                                    'data-tooltip': `${value.date}: ${value.count} problems solved`,
+                                };
+                            }}
+                            showWeekdayLabels={true}
+                        />
+                    </div>
                 </div>
+
             </div>
+
         </div>
     );
 };
