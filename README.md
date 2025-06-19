@@ -59,7 +59,7 @@ VITE_BACKEND_URL=http://localhost:5000
 ### 3. Setup Environment Variables for Backend
 PORT=5000
 
-MONGO_URI=mongodb+srv://keshabdas2003:studentdata@studentdata.by50zhx.mongodb.net/?retryWrites=true&w=majority&appName=StudentData
+MONGO_URI
 
 FRONTEND_URL=http://localhost:5173
 
